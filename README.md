@@ -19,9 +19,10 @@ npm install luacheck
 
 var luacheck = require("luacheck");
 
-var errors = luacheck(sourceFilename, options);
+var errors = luacheck(sourceFilename, options, function(code, errors) {
+    console.log(errors); // or `luacheck.errors` for the most recent invocation
+});
 
-console.log(errors); // or `luacheck.errors` for the most recent invocation
 ```
 
 ## Options

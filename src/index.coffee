@@ -6,7 +6,10 @@ fs = require "fs"
 path = require "path"
 
 
-luacheck = (filename, options={}) ->
+luacheck = (filename, options={}, cb=null) ->
+    if typeof options is "function"
+        cb = options
+        options = {}
     if typeof filename isnt "string"
         throw new Error("Please pass in a filename")
     if not fs.existsSync(filename)
@@ -36,16 +39,21 @@ luacheck = (filename, options={}) ->
     ].concat(argparse(options))
 
 
-    child = subprocess.spawnSync(exec, args, "cwd": cwd, "encoding": "utf-8")
-    if child.error
-        throw child.error
-
+    child = subprocess.spawn(exec, args, "cwd": cwd, "encoding": "utf-8")
     regexp = /^(.+)\:(\d+)\:(\d+)\:\s*\((W\d+)\)\s*(.+)$/
-    for line in child.stdout.split(/\r?\n/)
-        match = regexp.exec(line)
-        if match
-            luacheck.errors.push(new LuacheckError(match))
-    luacheck.errors
+
+    stdout = ""
+    child.stdout.on('data', (data) =>
+        stdout += data;
+    )
+    child.on('close', (code) =>
+        for line in stdout.split(/\r?\n/)
+            match = regexp.exec(line)
+            if match
+                luacheck.errors.push(new LuacheckError(match))
+        if cb
+            cb(null, luacheck.errors)
+    )
 
 
 module.exports = luacheck
