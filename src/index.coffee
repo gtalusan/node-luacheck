@@ -40,7 +40,7 @@ luacheck = (filename, options={}, cb=null) ->
 
 
     child = subprocess.spawn(exec, args, "cwd": cwd, "encoding": "utf-8")
-    regexp = /^(.+)\:(\d+)\:(\d+)\:\s*\((W\d+)\)\s*(.+)$/
+    regexp = /^(.+)\:(\d+)\:(\d+)\:\s*\(([EW]\d+)\)\s*(.+)$/
 
     stdout = ""
     child.stdout.on('data', (data) =>
